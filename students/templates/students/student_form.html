@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background: #f4f6f9; }
+        .card { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="password"], select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
+        .btn-save { background: #28a745; }
+        .btn-cancel { background: #6c757d; }
+        .help-text { font-size: 12px; color: #666; display: block; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>{{ title }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <small style="color: red;">{{ field.errors.0 }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="form-group" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">
+                <label for="assigned_halaqa">Assign to Academic Halaqa</label>
+                <select name="assigned_halaqa" id="assigned_halaqa">
+                    <option value="">-- Leave Unassigned --</option>
+                    {% for halaqa in halaqas %}
+                        <option value="{{ halaqa.id }}" {% if current_halaqa and current_halaqa.id == halaqa.id %}selected{% endif %}>
+                            {{ halaqa.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-save">Save Student Profile</button>
+                <a href="{% url 'students:student_list' %}" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

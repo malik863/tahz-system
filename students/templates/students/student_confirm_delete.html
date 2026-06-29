@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Student Profile</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background: #f4f6f9; }
+        .card { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
+        .btn-danger { background: #dc3545; }
+        .btn-cancel { background: #6c757d; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 style="color: #dc3545;">Warning: Permanent Action</h2>
+        <p>Are you absolutely sure you want to completely erase student account <strong>{{ student.username }}</strong> ({{ student.get_full_name }}) from the registry?</p>
+        <p style="color: #666; font-size: 14px;">This will break links to their performance analytics and cannot be undone.</p>
+        
+        <form method="POST" style="margin-top: 25px;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete Permanently</button>
+            <a href="{% url 'students:student_list' %}" class="btn btn-cancel">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

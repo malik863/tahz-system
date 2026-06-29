@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+
+    <div class="mb-3">
+        <a href="{% url 'accounts:dashboard_redirect' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-right-short"></i> العودة إلى لوحة التحكم
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 text-center p-4 bg-white">
+                <div class="mb-3">
+                    <i class="bi bi-person-circle text-primary" style="font-size: 4.5rem;"></i>
+                </div>
+                <h3 class="h4 mb-1 text-dark">{{ student.user.get_full_name|default:student.user.username }}</h3>
+                <span class="badge bg-light text-primary mb-3 px-3 py-2 fs-6">
+                    حلقة: {{ student.halaqa.name|default:"غير معين" }}
+                </span>
+                
+                <hr class="text-muted opacity-25">
+                
+                <div class="text-start px-2" style="text-align: right !important;">
+                    <p class="mb-2 text-muted"><strong><i class="bi bi-calendar3 me-1"></i> العمر:</strong> {{ student.age|default:"—" }} سنة</p>
+                    <p class="mb-2 text-muted"><strong><i class="bi bi-telephone me-1"></i> هاتف ولي الأمر:</strong> {{ student.parent_phone|default:"—" }}</p>
+                    <p class="mb-0 text-muted"><strong><i class="bi bi-clock me-1"></i> تاريخ الانضمام:</strong> {{ student.user.date_joined|date:"Y-m-d" }}</p>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 bg-white p-4">
+                <h4 class="mb-4 text-dark font-weight-bold border-bottom pb-2">
+                    <i class="bi bi-journal-text text-primary me-1"></i> سجل المتابعة التاريخي
+                </h4>
+
+                {% if records %}
+                    <div class="position-relative ps-3 border-start border-2 border-light ms-2">
+                        {% for record in records %}
+                        <div class="mb-4 position-relative">
+                            <div class="position-absolute bg-primary rounded-circle" style="width: 12px; height: 12px; right: -6px; top: 6px;"></div>
+                            
+                            <div class="card border-light bg-light p-3 ms-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 text-primary font-weight-bold">
+                                        <i class="bi bi-calendar-event me-1"></i> {{ record.date|date:"Y-m-d" }}
+                                    </h6>
+                                    <span class="badge {% if record.attendance == 'present' %}bg-success{% elif record.attendance == 'absent' %}bg-danger{% else %}bg-warning{% endif %}">
+                                        {{ record.get_attendance_display }}
+                                    </span>
+                                </div>
+                                
+                                {% if record.attendance == 'present' %}
+                                    <p class="mb-1 text-dark">
+                                        <strong>الحفظ الجديد:</strong> 
+                                        {% if record.memorization_surah %}
+                                            سورة {{ record.memorization_surah }} (تم إنجاز الورد؟: <span class="text-primary fw-bold">{{ record.get_memorization_status_display }}</span>)
+                                            <span class="badge bg-white text-dark border ms-1">{{ record.get_memorization_grade_display }}</span>
+                                        {% else %}
+                                            <span class="text-muted">لم يتم تسجيل حفظ جديد</span>
+                                        {% endif %}
+                                    </p>
+
+                                    <p class="mb-1 text-dark">
+                                        <strong>المراجعة اليومية:</strong> 
+                                        {% if record.revision_surah %}
+                                            سورة {{ record.revision_surah }} (تم إنجاز الورد؟: <span class="text-success fw-bold">{{ record.get_revision_status_display }}</span>)
+                                            <span class="badge bg-white text-dark border ms-1">{{ record.get_revision_grade_display }}</span>
+                                        {% else %}
+                                            <span class="text-muted">لم يتم تسجيل مراجعة</span>
+                                        {% endif %}
+                                    </p>
+
+                                    <p class="mb-1 text-dark">
+                                        <strong>حالة السلوك اليومي:</strong> <span class="text-muted">{{ record.get_behavior_display }}</span>
+                                    </p>
+                                {% endif %}
+
+                                {% if record.notes %}
+                                    <p class="mb-0 text-muted small mt-2 pt-2 border-top border-muted border-opacity-10">
+                                        <strong>ملاحظات المعلم ({{ record.teacher.get_full_name|default:record.teacher.username }}):</strong> 
+                                        <span class="text-dark d-block bg-white p-2 rounded mt-1 border border-light">{{ record.notes }}</span>
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-folder-x display-4 mb-3"></i>
+                        <p class="fs-5 mb-1">لا توجد سجلات يومية محفوظة لهذا الطالب بعد.</p>
+                        <p class="small text-muted mb-0">ستظهر السجلات هنا تلقائيًا بمجرد إدخال أول ورد يومي.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+    <div class="col-12 d-flex justify-content-end">
+        <div class="btn-group shadow-sm" role="group">
+            <button type="button" class="btn btn-primary px-4 fw-bold active" id="btn-monthly">عرض شهري</button>
+            <button type="button" class="btn btn-outline-primary px-4 fw-bold" id="btn-weekly">عرض أسبوعي</button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 bg-white p-4">
+            <h5 class="text-dark fw-bold mb-3"><i class="bi bi-graph-up text-primary me-1"></i> نسبة الحضور والمواظبة</h5>
+            <div style="position: relative; height:250px;">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 bg-white p-4">
+            <h5 class="text-dark fw-bold mb-3"><i class="bi bi-pie-chart text-success me-1"></i> مدى الالتزام بالورد اليومي</h5>
+            <div style="position: relative; height:250px;" class="d-flex justify-content-center">
+                <canvas id="wardPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mt-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 bg-white p-4">
+            <h5 class="text-dark fw-bold mb-3"><i class="bi bi-book text-warning me-1"></i> مستوى درجات الحفظ والمراجعة</h5>
+            <div style="position: relative; height:250px;">
+                <canvas id="gradesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 bg-white p-4">
+            <h5 class="text-dark fw-bold mb-3"><i class="bi bi-emoji-smile text-info me-1"></i> تقييم السلوك العام</h5>
+            <div style="position: relative; height:250px;">
+                <canvas id="behaviorChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. Core Variables & DOM Target Selectors
+    const studentId = "{{ student.id }}";
+    const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+    const wardCtx = document.getElementById('wardPieChart').getContext('2d');
+        // Inside your <script> block setup:
+    const gradesCtx = document.getElementById('gradesChart').getContext('2d');
+    const behaviorCtx = document.getElementById('behaviorChart').getContext('2d');
+
+    let gradesChart;
+    let behaviorChart;
+    let attendanceChart;
+    let wardPieChart;
+
+    // 2. Core Function: Fetch data from our Django API and draw/update charts
+    function loadAnalyticsData(timeFrame = 'monthly') {
+        // Fetch the raw text numbers you just verified in the browser!
+        fetch('/records/api/analytics/student/'+ studentId + '/?time_frame=' + timeFrame)
+            .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+            .then(data => {
+                
+                // 📈 A. BUILD / UPDATE THE ATTENDANCE LINE GRAPH
+                if (attendanceChart) {
+                    // If the chart exists already, just swap the values and refresh it
+                    attendanceChart.data.labels = data.labels;
+                    attendanceChart.data.datasets[0].data = data.attendance_data;
+                    attendanceChart.update();
+                } else {
+                    // First time load setup
+// Inside student_detail.html -> Find the attendanceChart configuration:
+
+                attendanceChart = new Chart(attendanceCtx, {
+                    type: 'bar', // 🔑 CHANGE THIS FROM 'line' TO 'bar'
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'نسبة الحضور %',
+                            data: data.attendance_data,
+                            backgroundColor: 'rgba(13, 110, 253, 0.85)', // Solid clean Blue bar
+                            borderColor: '#0d6efd',
+                            borderWidth: 1,
+                            barThickness: 40 // 🔑 Keeps the column from becoming too wide if it's alone
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { 
+                            y: { 
+                                min: 0, 
+                                max: 100,
+                                ticks: { stepSize: 20 }
+                            } 
+                        }
+                    }
+                });
+                }
+
+                // 🍕 B. BUILD THE QURAN WARD PIE CHART
+                if (!wardPieChart) {
+                    wardPieChart = new Chart(wardCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: data.pie_labels,
+                            datasets: [{
+                                data: data.pie_data,
+                                backgroundColor: ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                } else {
+                    wardPieChart.data.datasets[0].data = data.pie_data;
+                    wardPieChart.update();
+                }
+                // 📚 C. BUILD / UPDATE THE MEMORIZATION GRADES CHART
+                if (gradesChart) {
+                    gradesChart.data.labels = data.labels;
+                    gradesChart.data.datasets[0].data = data.memorization_data;
+                    gradesChart.update();
+                } else {
+                    gradesChart = new Chart(gradesCtx, {
+                        type: 'line', // Line graph works beautifully for tracking grade progress!
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'معدل درجات الحفظ',
+                                data: data.memorization_data,
+                                borderColor: '#ffc107',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                fill: true,
+                                tension: 0.2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { min: 0, max: 100 } } // Adjust max value if your grading is out of 5 or 10!
+                        }
+                    });
+                }
+
+                // 🧠 D. BUILD / UPDATE THE BEHAVIOR EVALUATION CHART
+                if (behaviorChart) {
+                    behaviorChart.data.labels = data.labels;
+                    behaviorChart.data.datasets[0].data = data.behavior_data;
+                    behaviorChart.update();
+                } else {
+                    behaviorChart = new Chart(behaviorCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'معدل السلوك',
+                                data: data.behavior_data,
+                                borderColor: '#0dcaf0',
+                                backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                                fill: true,
+                                tension: 0.2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { min: 0, max: 100 } }
+                        }
+                    });
+                }
+            });
+    }
+
+    
+
+    // 3. EVENT LISTENERS: Listen for toggle button clicks
+    document.getElementById('btn-monthly').addEventListener('click', function() {
+        this.classList.add('active');
+        document.getElementById('btn-weekly').classList.remove('active');
+        loadAnalyticsData('monthly'); // Refresh charts with monthly calculation rows
+    });
+
+    document.getElementById('btn-weekly').addEventListener('click', function() {
+        this.classList.add('active');
+        document.getElementById('btn-monthly').classList.remove('active');
+        loadAnalyticsData('weekly');  // Refresh charts with weekly calculation rows
+    });
+
+    // 4. Initial Trigger on Page Load
+    loadAnalyticsData('monthly');
+</script>
+
+</div>
+{% endblock %}

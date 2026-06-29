@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4" dir="rtl" style="text-align: right;">
+    
+    
+    <div class="card p-4 mb-4 shadow-sm border-0 bg-white">
+        <a href="{% url 'accounts:logout' %}" class="logout-btn">Sign Out →</a>
+        {% if halaqa %}
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h1 class="h3 text-primary mb-1">🕌 حلقة: {{ halaqa.name }}</h1>
+                    <p class="mb-0 text-muted">البوابة الرسمية لإدارة الحلقة | مرحباً، المعلم <strong>{{ request.user.get_full_name|default:request.user.username }}</strong></p>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        {{ students.count }} طلاب مسجلين
+                    </span>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-3">
+                <h1 class="h3 text-danger mb-2">⚠️ تنبيه إداري</h1>
+                <p class="mb-0 text-muted fs-5">لم يتم تعيينك في حلقة نشطة بعد. يرجى مراجعة إدارة النظام لتخصيص طلابك.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if halaqa and students %}
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 text-dark font-weight-bold">قائمة الحضور والمتابعة اليومية</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle table-hover mb-0 text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">اسم الطالب</th>
+                        <th scope="col">العمر</th>
+                        <th scope="col">هاتف ولي الأمر</th>
+                        <th scope="col">حالة المتابعة اليوم</th>
+                        <th scope="col">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td class="font-weight-bold text-dark text-start px-4">
+                            {{ student.user.get_full_name|default:student.user.username }}
+                        </td>
+                        
+                        <td>{{ student.age|default:"—" }} سنة</td>
+                        
+                        <td>📞 {{ student.parent_phone|default:"—" }}</td>
+                        
+                        <td>
+                            <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+                                <i class="bi bi-clock-history me-1"></i> في الانتظار
+                            </span>
+                        </td>
+                        
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'records:record_entry' student.id %}" class="btn btn-primary px-3">
+                                    <i class="bi bi-pencil-square"></i> تسجيل الورد اليومي
+                                </a>
+                                <a href="{% url 'students:student_detail' student.pk %}" class="btn btn-outline-secondary px-3">
+                                    <i class="bi bi-person-bounding-box"></i> ملف الطالب
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    {% elif halaqa %}
+    <div class="card text-center p-5 shadow-sm border-0 bg-white">
+        <div class="card-body">
+            <i class="bi bi-people text-muted display-4 mb-3"></i>
+            <p class="card-text fs-5 text-muted">لا يوجد طلاب مضافين إلى سجلك الأكاديمي حالياً.</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

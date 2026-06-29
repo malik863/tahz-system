@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background: #f4f6f9; color: #333; }
+        .card { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="password"], select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; }
+        .btn-save { background: #28a745; }
+        .btn-cancel { background: #6c757d; text-decoration: none; display: inline-block; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>{{ title }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small style="color: red;">{{ field.errors.0 }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            {% if is_edit %}
+                <div class="form-group" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">
+                    <label for="assigned_halaqa">Assign Study Circle (Halaqa)</label>
+                    <select name="assigned_halaqa" id="assigned_halaqa">
+                        <option value="">-- Unassigned / None --</option>
+                        {% for halaqa in halaqas %}
+                            <option value="{{ halaqa.id }}" {% if current_halaqa.id == halaqa.id %}selected{% endif %}>
+                                {{ halaqa.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn btn-save">Save Profile</button>
+                <a href="{% url 'accounts:teacher_list' %}" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

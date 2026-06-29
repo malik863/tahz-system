@@ -1,0 +1,19 @@
+
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-top: 4px solid #de350b; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 4px;">
+    <h3 style="color: #de350b; margin-bottom: 15px;">⚠️ Are you absolutely sure?</h3>
+    <p style="color: #555; line-height: 1.6;">
+        You are about to dissolve the circle: <strong>{{ halaqa.name }}</strong>. 
+    </p>
+    <blockquote style="margin: 15px 0; padding: 10px; background-color: #fafafa; border-left: 3px solid #ccc; font-size: 14px; color: #666;">
+        <strong>Note:</strong> Deleting this circle will safely detach all <strong>{{ halaqa.students.count }}</strong> assigned students and place them back into "Unassigned" status. Student accounts will not be deleted.
+    </blockquote>
+
+    <form method="POST" style="margin-top: 25px;">
+        {% csrf_token %}
+        <button type="submit" style="background-color: #de350b; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 10px;">Yes, Delete Circle</button>
+        <a href="{% url 'halaqat:halaqa_list' %}" style="background-color: #e1e4e8; color: #333; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

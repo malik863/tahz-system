@@ -1,0 +1,56 @@
+
+
+{% block content %}
+<div class="container" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>🕌 Halaqat Control Panel</h2>
+        <a href="{% url 'halaqat:halaqa_create' %}" class="btn btn-primary" style="background-color: #2b5797; padding: 10px 15px; color: white; text-decoration: none; border-radius: 4px;">+ Create New Halaqa</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 10px; background-color: #d4edda; color: #155724; border-radius: 4px; margin-bottom: 15px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <table style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <thead>
+            <tr style="background-color: #f4f5f7; border-bottom: 2px solid #e1e4e8; text-align: left;">
+                <th style="padding: 12px;">Halaqa Name</th>
+                <th style="padding: 12px;">Assigned Teacher</th>
+                <th style="padding: 12px;">Active Students</th>
+                <th style="padding: 12px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for halaqa in halaqas %}
+            <tr style="border-bottom: 1px solid #e1e4e8;">
+                <td style="padding: 12px;"><strong>{{ halaqa.name }}</strong></td>
+                <td style="padding: 12px;">
+                    {% if halaqa.teacher %}
+                        🎓 {{ halaqa.teacher.get_full_name|default:halaqa.teacher.username }}
+                    {% else %}
+                        <em style="color: #999;">No Teacher Assigned</em>
+                    {% endif %}
+                </td>
+                <td style="padding: 12px;">
+                    <span style="background-color: #e2e8f0; padding: 4px 8px; border-radius: 12px; font-weight: bold;">
+                        {{ halaqa.students.count }} students
+                    </span>
+                </td>
+                <td style="padding: 12px;">
+                    <a href="{% url 'halaqat:halaqa_edit' halaqa.pk %}" style="color: #2b5797; text-decoration: none; margin-right: 15px; font-weight: 500;">Edit</a>
+                    <a href="{% url 'halaqat:halaqa_delete' halaqa.pk %}" style="color: #de350b; text-decoration: none; font-weight: 500;">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="padding: 20px; text-align: center; color: #666;">No Halaqat have been established yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
